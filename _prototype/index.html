@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HabitSync</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <!-- ═══════════════ AUTH SCREEN ═══════════════ -->
+    <div id="auth-screen" class="fullscreen-overlay auth-bg active">
+        <div class="glass-card auth-card">
+            <div class="logo-mark" style="width: 56px; height: 56px; margin: 0 auto 20px;">
+                <svg viewBox="0 0 18 18" fill="none" style="width: 28px; height: 28px;">
+                    <path d="M9 2C9 2 5 5.5 5 9.5a4 4 0 008 0C13 5.5 9 2 9 2z" fill="#fff" opacity=".9"></path>
+                    <path d="M9 6.5v5M6.5 9.5l2.5-3.5 2.5 3.5" stroke="#1A7A4A" stroke-width="1.3" stroke-linecap="round"></path>
+                </svg>
+            </div>
+            <h1 class="auth-title">Welcome to HabitSync</h1>
+            <p class="auth-sub">Your personal wellbeing operating system.</p>
+            
+            <div class="field" style="margin-top: 38px;">
+                <div class="field-label" style="text-align: left; font-weight: 500; opacity: 0.9;">Your Name</div>
+                <input type="text" id="auth-name" class="chat-input" placeholder="e.g. Rahul Kumar" style="width: 100%; border-radius: 12px; padding: 14px 18px; font-size: 16px; background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.2); color: #fff;" />
+            </div>
+            <button class="btn-primary auth-submit pulse" style="width: 100%; padding: 16px; font-size: 16px; margin-top: 24px; border-radius: 12px; font-weight: 600;" onclick="handleAuth()">Get Started</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════ ONBOARDING SCREEN ═══════════════ -->
+    <div id="onboarding-screen" class="fullscreen-overlay onboarding-bg">
+        <div class="glass-card onboarding-card">
+            <div class="onboarding-header">
+                <h2 id="ob-title">Mental Health Check</h2>
+                <p id="ob-sub">Let's set your baseline so we can personalize your experience.</p>
+                <div class="ob-progress"><div class="ob-progress-fill" id="ob-progress-fill"></div></div>
+            </div>
+
+            <div class="ob-step active" id="ob-step-1">
+                <h3 class="ob-question">1. How would you rate your sleep quality recently?</h3>
+                <div class="ob-options">
+                    <button class="ob-opt" onclick="selectObOpt(1, 1)">Poor</button>
+                    <button class="ob-opt" onclick="selectObOpt(1, 2)">Fair</button>
+                    <button class="ob-opt" onclick="selectObOpt(1, 4)">Good</button>
+                    <button class="ob-opt" onclick="selectObOpt(1, 5)">Excellent</button>
+                </div>
+            </div>
+
+            <div class="ob-step" id="ob-step-2">
+                <h3 class="ob-question">2. How manageable is your daily stress?</h3>
+                <div class="ob-options">
+                    <button class="ob-opt" onclick="selectObOpt(2, 1)">Overwhelming</button>
+                    <button class="ob-opt" onclick="selectObOpt(2, 2)">High but coping</button>
+                    <button class="ob-opt" onclick="selectObOpt(2, 4)">Manageable</button>
+                    <button class="ob-opt" onclick="selectObOpt(2, 5)">Very calm</button>
+                </div>
+            </div>
+
+            <div class="ob-step" id="ob-step-3">
+                <h3 class="ob-question">3. How often do you feel energized throughout the day?</h3>
+                <div class="ob-options">
+                    <button class="ob-opt" onclick="selectObOpt(3, 1)">Rarely</button>
+                    <button class="ob-opt" onclick="selectObOpt(3, 2)">Sometimes</button>
+                    <button class="ob-opt" onclick="selectObOpt(3, 4)">Usually</button>
+                    <button class="ob-opt" onclick="selectObOpt(3, 5)">Always</button>
+                </div>
+            </div>
+
+            <div class="ob-step" id="ob-step-4">
+                <div style="text-align:center; padding: 20px 0;">
+                    <div style="font-size: 54px; margin-bottom: 16px;">✨</div>
+                    <h3 style="font-size: 24px;">You're all set!</h3>
+                    <p style="color:var(--text2); margin-top: 10px; font-size: 15px;">We've calculated your baseline wellbeing score.</p>
+                    <div class="baseline-badge" id="ob-score-display">--</div>
+                    <p style="color:var(--text3); font-size: 13px; margin-bottom: 24px;">This score will help tailor the AI coach suggestions.</p>
+                    <button class="btn-primary" style="width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600;" onclick="finishOnboarding()">Enter Dashboard</button>
+                </div>
+            </div>
+            
+            <div class="ob-nav" id="ob-nav">
+                <button class="btn-ghost" onclick="prevObStep()" id="ob-prev" style="visibility:hidden; width: 100px;">Back</button>
+                <button class="btn-primary" onclick="nextObStep()" id="ob-next" style="width: 160px; padding: 12px; border-radius: 8px;" disabled>Next Question</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ MAIN APP ═══════════════ -->
+    <div id="main-app" class="app-layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-mark">
+                <svg viewBox="0 0 18 18" fill="none">
+                    <path d="M9 2C9 2 5 5.5 5 9.5a4 4 0 008 0C13 5.5 9 2 9 2z" fill="#fff" opacity=".9" />
+                    <path d="M9 6.5v5M6.5 9.5l2.5-3.5 2.5 3.5" stroke="#1A7A4A" stroke-width="1.3"
+                        stroke-linecap="round" />
+                </svg>
+            </div>
+            <div>
+                <div class="logo-name">HabitSync</div>
+                <div class="logo-sub">Wellbeing OS</div>
+            </div>
+        </div>
+
+        <div class="nav-section-label">Main</div>
+        <button class="nav-link active" data-page="dashboard">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" />
+                <rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" />
+                <rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" />
+                <rect x="9" y="9" width="5.5" height="5.5" rx="1.5" />
+            </svg>
+            Dashboard
+        </button>
+        <button class="nav-link" data-page="tasks">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M2 4h12M2 8h8M2 12h10" />
+            </svg>
+            Tasks
+        </button>
+        <button class="nav-link" data-page="coach">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path
+                    d="M14 5.5C14 3.6 12.4 2 10.5 2h-5C3.6 2 2 3.6 2 5.5S3.6 9 5.5 9H6l2.5 3L11 9h-.5C12.4 9 14 7.4 14 5.5z" />
+            </svg>
+            AI Coach
+        </button>
+        <button class="nav-link" data-page="insights">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M2 12l3-4 3 2 3-5 3 3" />
+            </svg>
+            Insights
+        </button>
+
+        <div class="nav-section-label">Account</div>
+        <button class="nav-link" data-page="profile">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <circle cx="8" cy="5.5" r="2.5" />
+                <path d="M2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5" />
+            </svg>
+            Profile
+        </button>
+
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar-sm">RK</div>
+                <div>
+                    <div class="user-name">Rahul K.</div>
+                    <div class="user-pts" id="sidebar-pts">340 pts</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- ═══════════════ DASHBOARD ═══════════════ -->
+        <div id="page-dashboard" class="page active">
+            <div class="topbar">
+                <div>
+                    <div class="page-title">Good morning, Rahul</div>
+                </div>
+                <div class="topbar-right">
+                    <div class="date-badge">Sun, Apr 5 · 2026</div>
+                    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                        <div class="theme-toggle-thumb" id="theme-thumb">☀️</div>
+                    </button>
+                    <div class="topbar-avatar">RK</div>
+                </div>
+            </div>
+            <div class="scroll-area">
+                <div id="checkin-banner" class="checkin-banner">
+                    <div>
+                        <div class="banner-text" style="font-weight:500;margin-bottom:2px">Daily check-in pending</div>
+                        <div style="font-size:12px;color:var(--amber-text);opacity:0.75">Log your mood and screen time
+                            to earn +5 pts</div>
+                    </div>
+                    <button class="btn-primary pulse" onclick="openCheckin()">Check in now</button>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Current streak</div>
+                        <div class="metric-val" id="m-streak">12 <span>days</span></div>
+                        <div class="metric-delta delta-up">↑ Best was 19</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total points</div>
+                        <div class="metric-val" id="m-pts">340</div>
+                        <div class="metric-delta delta-up">+15 today</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Mood avg (7d)</div>
+                        <div class="metric-val">7.2 <span>/ 10</span></div>
+                        <div class="metric-delta delta-up">↑ +0.8 vs last week</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Screen time</div>
+                        <div class="metric-val">3.1 <span>h</span></div>
+                        <div class="metric-delta delta-up">↓ 20min below avg</div>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-title">Mood — last 7 days <span
+                                style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">·
+                                click a dot</span></div>
+                        <div class="chart-wrap" style="position:relative;height:110px">
+                            <canvas id="mood-chart" style="width:100%;height:110px;display:block"></canvas>
+                            <div id="chart-tooltip"
+                                style="position:absolute;background:var(--text);color:#fff;font-size:11px;padding:4px 9px;border-radius:6px;pointer-events:none;display:none;white-space:nowrap;font-family:var(--mono);z-index:10;transform:translateX(-50%)">
+                            </div>
+                        </div>
+                        <div class="chart-labels">
+                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Today</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Today's tasks</div>
+                        <div id="dash-tasks">
+                            <!-- Tasks injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card section-gap">
+                    <div class="card-title">This week's streak <span
+                            style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">·
+                            tap a day for details</span></div>
+                    <div class="streak-row">
+                        <div class="s-dot s-done" onclick="openDayDetail('Monday')">M</div>
+                        <div class="s-dot s-done" onclick="openDayDetail('Tuesday')">T</div>
+                        <div class="s-dot s-done" onclick="openDayDetail('Wednesday')">W</div>
+                        <div class="s-dot s-done" onclick="openDayDetail('Thursday')">T</div>
+                        <div class="s-dot s-done" onclick="openDayDetail('Friday')">F</div>
+                        <div class="s-dot s-done" onclick="openDayDetail('Saturday')">S</div>
+                        <div class="s-dot s-today" onclick="openDayDetail('Sunday')">S</div>
+                    </div>
+                    <div class="text-muted" style="margin-top:8px">12-day streak · longest: 19 days</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">AI suggestion of the day</div>
+                    <div style="font-size:13px;color:var(--text);line-height:1.6;">
+                        Your mood scores tend to peak on Wednesdays and dip on Thursdays. Consider scheduling your most
+                        demanding focus tasks mid-week when your energy is naturally higher.
+                    </div>
+                    <div class="tags-row">
+                        <span class="tag">Based on 7-day log</span>
+                        <span class="tag">Focus</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ TASKS ═══════════════ -->
+        <div id="page-tasks" class="page">
+            <div class="topbar">
+                <div class="page-title">Tasks</div>
+                <div class="topbar-right">
+                    <select
+                        style="font-size:12px;padding:6px 10px;border:1px solid var(--border-med);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);font-family:var(--font);cursor:pointer;outline:none">
+                        <option>Today</option>
+                        <option>This week</option>
+                        <option>All tasks</option>
+                    </select>
+                    <button class="btn-primary" onclick="openAddTask()">+ Add task</button>
+                </div>
+            </div>
+            <div class="scroll-area" id="full-tasks-list">
+                <!-- Grouped tasks injected via JS -->
+            </div>
+        </div>
+
+        <!-- ═══════════════ AI COACH ═══════════════ -->
+        <div id="page-coach" class="page">
+            <div class="topbar">
+                <div class="page-title">AI Coach</div>
+                <div class="ctx-bar">
+                    <span class="ctx-chip">Mood 7.2</span>
+                    <span class="ctx-chip">Screen 3.1h</span>
+                    <span class="ctx-chip">Streak 12d</span>
+                    <span class="ctx-chip">Focus 6.8</span>
+                </div>
+            </div>
+            <div class="coach-wrap">
+                <div class="chat-window" id="chat-win">
+                    <div class="msg-wrap">
+                        <div class="bubble ai">Hey Rahul! Your 12-day streak is impressive — you're in the top 20% of
+                            HabitSync users this month. I noticed your screen time dropped below average this week.
+                            That's directly correlated with your higher focus scores. Keep protecting those morning
+                            blocks.</div>
+                    </div>
+                    <div class="msg-wrap user">
+                        <div class="bubble user">What should I focus on this week?</div>
+                    </div>
+                    <div class="msg-wrap">
+                        <div class="bubble ai">Based on your data, Thursday is your weakest day — mood dips to ~5.5 and
+                            task completion drops 40%. I'd suggest front-loading your hard focus tasks Monday–Wednesday,
+                            and keeping Thursday for lighter review work. Want me to draft a Thursday-light task preset?
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-row">
+                    <input class="chat-input" id="chat-input" placeholder="Ask your coach anything..."
+                        onkeydown="if(event.key==='Enter')sendChat()" />
+                    <button class="btn-primary" onclick="sendChat()">Send</button>
+                </div>
+                <div class="quick-prompts">
+                    <button class="qp-btn" onclick="quickChat('Why do I feel low energy on Thursdays?')">Why low energy
+                        Thursdays?</button>
+                    <button class="qp-btn" onclick="quickChat('Suggest a new morning habit')">Suggest a morning
+                        habit</button>
+                    <button class="qp-btn" onclick="quickChat('How can I reduce screen time further?')">Reduce screen
+                        time</button>
+                    <button class="qp-btn" onclick="quickChat('What does my mood data say?')">Read my mood data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ INSIGHTS ═══════════════ -->
+        <div id="page-insights" class="page">
+            <div class="topbar">
+                <div class="page-title">Insights</div>
+                <div class="topbar-right">
+                    <button class="btn-sm">Last 7 days</button>
+                    <button class="btn-sm">Last 30 days</button>
+                </div>
+            </div>
+            <div class="scroll-area">
+                <div class="insight-card">
+                    <div class="insight-icon" style="background:var(--green-light)">
+                        <svg viewBox="0 0 18 18" fill="none" stroke="var(--green)" stroke-width="1.5"
+                            stroke-linecap="round">
+                            <path d="M9 2l1.8 5.4H16l-4.6 3.3 1.8 5.5L9 13 4.8 16.2l1.8-5.5L2 7.4h5.2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="insight-title">Screen time correlates with mood</div>
+                        <div class="insight-desc">On days when your screen time exceeds 4 hours, your mood score
+                            averages 5.1. On days below 3 hours, it averages 7.8. Reducing screen time has the highest
+                            impact on your wellbeing.</div>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon" style="background:var(--blue-light)">
+                        <svg viewBox="0 0 18 18" fill="none" stroke="#185FA5" stroke-width="1.5" stroke-linecap="round">
+                            <circle cx="9" cy="9" r="7" />
+                            <path d="M9 5v5l3 2" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="insight-title">Best performance window: 9–11 AM</div>
+                        <div class="insight-desc">Your focus scores peak between 9 and 11 AM based on task completion
+                            patterns. Schedule your highest-priority work in this window for maximum output.</div>
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon" style="background:var(--amber-light)">
+                        <svg viewBox="0 0 18 18" fill="none" stroke="var(--amber-text)" stroke-width="1.5"
+                            stroke-linecap="round">
+                            <path d="M9 3v9M5 9l4 4 4-4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="insight-title">Thursday is your weakest day</div>
+                        <div class="insight-desc">Task completion drops 38% on Thursdays. Mood averages 5.5 vs your 7.2
+                            weekly average. Consider a lighter task schedule on Thursdays.</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:14px">
+                    <div class="card-title">Screen time — last 7 days</div>
+                    <div class="bar-chart">
+                        <div class="bar-row"><span class="bar-day">Mon</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:62%"></div>
+                            </div><span class="bar-val">3.1h</span>
+                        </div>
+                        <div class="bar-row"><span class="bar-day">Tue</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:55%"></div>
+                            </div><span class="bar-val">2.7h</span>
+                        </div>
+                        <div class="bar-row"><span class="bar-day">Wed</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:48%"></div>
+                            </div><span class="bar-val">2.4h</span>
+                        </div>
+                        <div class="bar-row"><span class="bar-day">Thu</span>
+                            <div class="bar-track">
+                                <div class="bar-fill high" style="width:85%"></div>
+                            </div><span class="bar-val">4.2h</span>
+                        </div>
+                        <div class="bar-row"><span class="bar-day">Fri</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:60%"></div>
+                            </div><span class="bar-val">3.0h</span>
+                        </div>
+                        <div class="bar-row"><span class="bar-day">Sat</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:78%"></div>
+                            </div><span class="bar-val">3.9h</span>
+                        </div>
+                        <div class="bar-row"><span class="bar-day">Sun</span>
+                            <div class="bar-track">
+                                <div class="bar-fill" style="width:62%"></div>
+                            </div><span class="bar-val">3.1h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-title">Task completion rate</div>
+                        <div
+                            style="font-size:32px;font-weight:300;letter-spacing:-1px;color:var(--green);margin-bottom:4px">
+                            78%</div>
+                        <div class="text-muted">↑ vs 62% last month</div>
+                        <hr class="divider" />
+                        <div style="font-size:12px;color:var(--text2)">Habit tasks: <strong>85%</strong></div>
+                        <div style="font-size:12px;color:var(--text2)">Focus tasks: <strong>72%</strong></div>
+                        <div style="font-size:12px;color:var(--text2)">Health tasks: <strong>76%</strong></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Energy by day of week</div>
+                        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Mon</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width:72%"></div>
+                                </div><span class="bar-val">3.6</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Tue</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width:80%"></div>
+                                </div><span class="bar-val">4.0</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Wed</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width:86%"></div>
+                                </div><span class="bar-val">4.3</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Thu</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill high" style="width:40%"></div>
+                                </div><span class="bar-val">2.0</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Fri</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width:65%"></div>
+                                </div><span class="bar-val">3.2</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Sat</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width:70%"></div>
+                                </div><span class="bar-val">3.5</span>
+                            </div>
+                            <div class="bar-row"><span class="bar-day" style="font-size:10px">Sun</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width:75%"></div>
+                                </div><span class="bar-val">3.8</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════ PROFILE ═══════════════ -->
+        <div id="page-profile" class="page">
+            <div class="topbar">
+                <div class="page-title">Profile</div>
+                <div class="topbar-right">
+                    <button class="btn-sm" onclick="editProfile()">Edit profile</button>
+                    <button class="btn-sm" style="color:var(--red-text);border-color:#F09595" onclick="signOut()">Sign out</button>
+                </div>
+            </div>
+            <div class="scroll-area">
+                <div class="profile-header-card">
+                    <div class="big-avatar">RK</div>
+                    <div>
+                        <div style="font-size:17px;font-weight:500;letter-spacing:-0.3px" class="user-name">Rahul Kumar</div>
+                        <div style="font-size:12px;color:var(--text3);margin-top:2px">Member since Jan 2025 ·
+                            India/Kolkata</div>
+                        <div class="tags-row" style="margin-top:6px">
+                            <span class="tag">Streak master</span>
+                            <span class="tag">Focus champion</span>
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="pstat">
+                            <div class="pstat-val" id="prof-pts">340</div>
+                            <div class="pstat-label">points</div>
+                        </div>
+                        <div class="pstat">
+                            <div class="pstat-val green" id="prof-streak">12</div>
+                            <div class="pstat-label">streak</div>
+                        </div>
+                        <div class="pstat">
+                            <div class="pstat-val">19</div>
+                            <div class="pstat-label">best streak</div>
+                        </div>
+                        <div class="pstat">
+                            <div class="pstat-val">87</div>
+                            <div class="pstat-label">days logged</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="two-col">
+                    <div class="card">
+                        <div class="card-title">Check-in heatmap — 14 days</div>
+                        <div class="heatmap-grid">
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-2"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-1"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-0"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-2"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-1"></div>
+                            <div class="hm-cell hm-3"></div>
+                            <div class="hm-cell hm-3"></div>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-top:10px;align-items:center">
+                            <span style="font-size:10px;color:var(--text3)">Less</span>
+                            <div
+                                style="width:12px;height:12px;border-radius:3px;background:var(--surface2);border:1px solid var(--border)">
+                            </div>
+                            <div style="width:12px;height:12px;border-radius:3px;background:#C0DD97"></div>
+                            <div style="width:12px;height:12px;border-radius:3px;background:#639922"></div>
+                            <div style="width:12px;height:12px;border-radius:3px;background:var(--green)"></div>
+                            <span style="font-size:10px;color:var(--text3)">More</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Settings</div>
+                        <div style="display:flex;flex-direction:column;gap:12px">
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+                                <span>Reminder time</span>
+                                <input type="time" value="08:00"
+                                    style="border:1px solid var(--border-med);border-radius:6px;padding:4px 8px;font-size:12px;font-family:var(--mono);color:var(--text);background:var(--surface);cursor:pointer;outline:none" />
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+                                <span>Timezone</span>
+                                <select
+                                    style="border:1px solid var(--border-med);border-radius:6px;padding:4px 8px;font-size:12px;font-family:var(--font);color:var(--text);background:var(--surface);outline:none;cursor:pointer">
+                                    <option>Asia/Kolkata</option>
+                                    <option>UTC</option>
+                                    <option>America/NY</option>
+                                </select>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+                                <span>Email reminders</span>
+                                <label style="position:relative;width:36px;height:20px;cursor:pointer">
+                                    <input type="checkbox" checked style="opacity:0;width:0;height:0"
+                                        id="toggle-email" />
+                                    <span id="toggle-track"
+                                        style="position:absolute;inset:0;background:var(--green);border-radius:20px;transition:background .2s"></span>
+                                    <span id="toggle-thumb"
+                                        style="position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;transform:translateX(16px)"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Recent points history</div>
+                    <div class="pts-entry"><span>Daily check-in</span><span class="pts-time">Today, 9:14 AM</span><span
+                            class="pts-pos">+5</span></div>
+                    <div class="pts-entry"><span>Task: Morning meditation</span><span class="pts-time">Today, 8:32
+                            AM</span><span class="pts-pos">+10</span></div>
+                    <div class="pts-entry"><span>Daily check-in</span><span class="pts-time">Yesterday</span><span
+                            class="pts-pos">+5</span></div>
+                    <div class="pts-entry"><span>Task: Deep work block</span><span
+                            class="pts-time">Yesterday</span><span class="pts-pos">+10</span></div>
+                    <div class="pts-entry"><span>Task skipped: Review goals</span><span class="pts-time">Apr
+                            3</span><span class="pts-neg">-5</span></div>
+                    <div class="pts-entry"><span>Streak bonus (10 days)</span><span class="pts-time">Apr 3</span><span
+                            class="pts-pos">+15</span></div>
+                    <div class="pts-entry"><span>Daily check-in</span><span class="pts-time">Apr 3</span><span
+                            class="pts-pos">+5</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main -->
+
+    <!-- DAY DETAIL MODAL -->
+    <div class="day-modal-overlay" id="day-modal-overlay">
+        <div class="day-modal">
+            <div class="day-modal-header">
+                <div class="day-modal-title" id="day-modal-title">Monday</div>
+                <button class="day-modal-close" onclick="closeDayDetail()">✕</button>
+            </div>
+            <div class="day-stat-grid" id="day-stat-grid"></div>
+            <div class="day-tasks-title">Tasks</div>
+            <div id="day-tasks-list"></div>
+            <div class="day-badge" id="day-badge"></div>
+        </div>
+    </div>
+
+    <!-- CHECK-IN MODAL ═══════════════ -->
+    <div class="modal-overlay" id="checkin-modal">
+        <div class="modal">
+            <div class="modal-title">Daily check-in</div>
+            <div class="modal-sub">Log your wellbeing for today · earn +5 pts</div>
+
+            <div class="field">
+                <div class="field-label">Mood <span id="v-mood">7</span></div>
+                <input type="range" class="slider" min="1" max="10" value="7"
+                    oninput="document.getElementById('v-mood').textContent=this.value" />
+            </div>
+            <div class="field">
+                <div class="field-label">Screen time (hours) <span id="v-screen">3</span></div>
+                <input type="range" class="slider" min="0" max="12" value="3"
+                    oninput="document.getElementById('v-screen').textContent=this.value" />
+            </div>
+            <div class="field">
+                <div class="field-label">Focus score <span id="v-focus">7</span></div>
+                <input type="range" class="slider" min="1" max="10" value="7"
+                    oninput="document.getElementById('v-focus').textContent=this.value" />
+            </div>
+            <div class="field">
+                <div class="field-label">Energy level <span id="v-energy">3</span></div>
+                <input type="range" class="slider" min="1" max="5" value="3"
+                    oninput="document.getElementById('v-energy').textContent=this.value" />
+            </div>
+            <div class="field">
+                <div class="field-label">Notes (optional)</div>
+                <textarea class="notes" placeholder="How are you feeling today?"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeCheckin()">Cancel</button>
+                <button class="btn-primary" onclick="submitCheckin()">Submit check-in (+5 pts)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ ADD TASK MODAL ═══════════════ -->
+    <div class="modal-overlay" id="addtask-modal">
+        <div class="modal">
+            <div class="modal-title">Add new task</div>
+            <div class="modal-sub">Tasks earn +10 pts when completed</div>
+            <div class="field">
+                <div class="field-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">
+                    Task title</div>
+                <input type="text" id="new-task-title" placeholder="e.g. Meditate for 10 minutes" />
+            </div>
+            <div class="field">
+                <div class="field-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">
+                    Category</div>
+                <select id="new-task-cat">
+                    <option value="habit">Habit</option>
+                    <option value="focus">Focus</option>
+                    <option value="health">Health</option>
+                </select>
+            </div>
+            <div class="field">
+                <div class="field-label" style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">
+                    Recurring?</div>
+                <select id="new-task-recur">
+                    <option value="">One-time</option>
+                    <option value="FREQ=DAILY">Daily</option>
+                    <option value="FREQ=WEEKLY">Weekly</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" onclick="closeAddTask()">Cancel</button>
+                <button class="btn-primary" onclick="addTask()">Add task</button>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /app-layout -->
+    <script src="./script.js"></script>
+</body>
+
+</html>
